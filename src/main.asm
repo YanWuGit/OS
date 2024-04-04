@@ -1,44 +1,35 @@
-ORG 0x7C00
-BITS 16
+; A boot sector that enters 32 - bit protected mode.
+[org 0x7c00]
 
-main:
-    MOV ax,0
-    MOV ds,ax   ; data segment
-    MOV es,ax   ; extra segment
-    MOV ss,ax   ; start addr of stack
+    mov bp , 0x9000 ; Set the stack.
+    mov sp , bp
 
-    MOV sp,0x7C00
-    MOV si,os_boot_msg
-    CALL print
+    mov bx , MSG_REAL_MODE
+    call print_string
 
-    HLT
+    call switch_to_pm  ; Note that we never return from here.
 
-halt: 
-    JMP halt
+    jmp $
 
-print:
-    PUSH si
-    PUSH ax
-    PUSH bx
+%include "src/print_string.asm"
+%include "src/gdt.asm"
+%include "src/print_string_pm.asm"
+%include "src/switch_to_pm.asm"
 
-print_loop:
-    LODSB
-    OR al,al
-    JZ done_print
+[bits 32]
 
-    MOV ah, 0x0E
-    MOV bh, 0
-    INT 0x10
+; This is where we arrive after switching to and initialising protected mode.
+BEGIN_PM:
+    mov ebx, MSG_PROT_MODE
+    call print_string_pm ; Use our 32 - bit print routine.
 
-    JMP print_loop
+    jmp $
 
-done_print:
-    POP bx
-    POP ax
-    POP si
-    RET
+; Hang.
+; Global variables
+MSG_REAL_MODE db "Started in 16 - bit Real Mode" , 0
+MSG_PROT_MODE db "Successfully landed in 32 - bit Protected Mode" , 0
 
-os_boot_msg: DB 'One File OS has booted!', 0x0D, 0x0A, 0
-
-TIMES 510-($-$$) DB 0
-DW 0AA55h
+; Bootsector padding
+times 510-($-$$) db 0
+dw 0xaa55
