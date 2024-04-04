@@ -41,12 +41,9 @@ switch_to_pm:
 
         ; Update our stack position so it is right
         ; at the top of the free space.
-        mov ebp, 0x90000               
+        mov ebp, 0x90000
         mov esp, ebp
 
-    ; Clear the screen and print a character to let us know we're in PM
-    call clear_screen
-    call print_char_pm
 
         ; Call the procedure that starts your 32-bit code
         call BEGIN_PM                   
@@ -54,20 +51,3 @@ switch_to_pm:
         ; Definitions of gdt_descriptor, CODE_SEG, DATA_SEG, BEGIN_PM, etc. should be elsewhere.
         ; This file just contains the bits to switch to PM.
 
-; Function to clear the screen
-clear_screen:
-    mov edi, 0xB8000          ; Start address of text-mode video memory
-    mov ecx, 2000             ; Number of characters on a standard 80x25 screen
-    mov ax, 0x0720            ; Attribute-byte pair (gray on black space character)
-clear_loop:
-    stosw                     ; Write AX to ES:EDI and increase DI by 2
-    loop clear_loop
-    ret
-
-; Function to print a single character in PM
-print_char_pm:
-    mov edi, 0xB8000          ; Start address of text-mode video memory
-    mov al, 'P'               ; Character to print
-    mov ah, 0x07              ; Attribute byte (light gray on black)
-    stosw                     ; Write AX to ES:EDI
-    ret
