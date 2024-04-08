@@ -48,6 +48,9 @@ BEGIN_PM:
     mov ebx, MSG_PROT_MODE
     call print_string_pm ; Use our 32 - bit print routine.
 
+    ; Now jump to the address of our loaded kernel code , assume the brace position ,
+    call KERNEL_OFFSET
+
     jmp $
 
 ; Global variables
