@@ -1,0 +1,44 @@
+#include <stdint.h> 
+
+#include "keyboard_driver_keymapping.h"
+
+// Define the I/O ports
+#define KEYBOARD_DATA_PORT 0x60
+#define KEYBOARD_STATUS_PORT 0x64
+
+// Function prototypes
+void init_keyboard_driver();
+void keyboard_handler();
+char keycode_to_char(uint8_t keycode);
+
+// Global variables
+volatile char last_key = 0;
+volatile int shift_pressed = 0;
+
+// Initialize keyboard driver
+void init_keyboard_driver() {
+    // You would need to set up the keyboard interrupt (IRQ1) handler here.
+    // This involves setting the appropriate entry in the IDT to point to the keyboard_handler function.
+}
+
+// Keyboard interrupt handler
+void keyboard_handler() {
+    uint8_t status = inb(KEYBOARD_STATUS_PORT);
+    uint8_t keycode = inb(KEYBOARD_DATA_PORT);
+
+    if (status & 0x01) { // Check if the status indicates data is available
+        // Here, you'd typically check if the key is a make or break code (pressed or released)
+        // For simplicity, we're just storing the keycode to a global variable
+        last_key = keycode_to_char(keycode);
+        // Implement additional logic for handling special keys like Shift, Caps Lock, etc.
+    }
+}
+
+// Dummy implementation for inb function to read a byte from an I/O port
+// You would have the actual implementation in your kernel
+uint8_t inb(uint16_t port) {
+    // Implementation depends on your kernel's way of interacting with hardware
+    return 0;
+}
+
+// Add the rest of your kernel's specific implementations...
